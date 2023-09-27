@@ -1,0 +1,70 @@
+.title An invertor
+
+*.include 45nm_PMOS_bulk54430.pm
+*.include 45nm_NMOS_bulk67135.pm
+
+.model nmos NMOS ( KP = 120U VTO=1 LAMBDA = 0.01)
+.model pmos PMOS ( KP=40U VTO=-1 LAMBDA = 0.01)
+.param vdd = 5
+.param vdd1 = 0
+.param vdd2 = 0
+
+MN n4 in 0 0 nmos L=30u W=10u
+MP out in dd dd pmos L=30u W=30u 
+*R out 0 1000
+C out n1 1p
+
+Vdd1 n1 0 {vdd1}
+Vdd2 n2 dd {vdd2}
+Vdd3 out n4 {vdd2}
+
+*Vin in 0  pulse 0 {Vdd} 100n 0.1n 0.1n 100n 200n 
+** divise la periode de V5 par 2
+*Vin in 0  pulse 0 {Vdd} 50n 0.1n 0.1n 50n 100n 
+**V5 est un signal carré de période 200ns, dont la durée de transition bas-haut ou haut-bas est égale à 50ns
+Vin in 0  pulse 0 {Vdd} 50n 50n 50n 50n 200n 
+
+Vdd n2 0 {vdd} 
+
+*.measure tran Iaverage avg i(vdd) 
+*.measure tran Vddpower avg par('i(Vdd)*v(dd)')
+
+** Puissance moyenne de l'PMOS
+*.measure TRAN PPMOS_moy AVG par('(v(dd)-v(out))*i(vdd2)') 
+** Puissance moyenne de l'NMOS
+*.measure TRAN PNMOS_moy AVG par('v(out)*i(vdd3)') 
+** Puissance moyenne de l'CL
+*.measure TRAN PCL_moy AVG par('v(n2)*i(vdd1)') 
+** Puissance moyenne de l'alimentation
+*.measure TRAN Palim_moy AVG par('v(dd)*i(vdd2)') 
+**fuite
+*.measure TRAN Palim_moy_fuite1 AVG par('v(dd)*i(vdd2)') FROM=160ns TO=190ns
+*.measure TRAN Palim_moy_fuite2 AVG par('v(dd)*i(vdd2)') FROM=260ns TO=290ns
+**Palim_moy_fuite = (Palim_moy_fuite1+Palim_moy_fuite2)*30/200
+
+.control
+
+save all @MN[id] @MP[id]
+**2-3 periodes
+tran 5n 500n
+**au moins 20 periodes
+*tran 5n 5000n
+**dc Vin 0 1 0.001 
+**op
+plot V(in)  V(out)
+plot @MN[id] @MP[id]
+plot i(vdd)
+
+** Puissance de PMOS
+plot {@MP[id]*(V(dd)-V(out))}
+** Puissance de NMOS
+plot {@MN[id]*V(out)}
+** Puissance de C
+plot V(out)*i(Vdd1)
+** Puissance de E
+plot {V(n2)*i(vdd2)}
+
+
+.endc 
+.end
+
