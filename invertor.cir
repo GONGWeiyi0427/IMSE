@@ -14,17 +14,18 @@ MP out in dd dd pmos L=30u W=30u
 *R out 0 1000
 C out n1 1p
 
+Vdd n2 0 {vdd}
 Vdd1 n1 0 {vdd1}
 Vdd2 n2 dd {vdd2}
 Vdd3 out n4 {vdd2}
 
-*Vin in 0  pulse 0 {Vdd} 100n 0.1n 0.1n 100n 200n 
+Vin in 0  pulse 0 {Vdd} 100n 0.1n 0.1n 100n 200n 
 ** divise la periode de V5 par 2
 *Vin in 0  pulse 0 {Vdd} 50n 0.1n 0.1n 50n 100n 
 **V5 est un signal carré de période 200ns, dont la durée de transition bas-haut ou haut-bas est égale à 50ns
-Vin in 0  pulse 0 {Vdd} 50n 50n 50n 50n 200n 
+*Vin in 0  pulse 0 {Vdd} 50n 50n 50n 50n 200n 
 
-Vdd n2 0 {vdd} 
+ 
 
 *.measure tran Iaverage avg i(vdd) 
 *.measure tran Vddpower avg par('i(Vdd)*v(dd)')
