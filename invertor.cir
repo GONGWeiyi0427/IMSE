@@ -51,18 +51,18 @@ tran 5n 500n
 *tran 5n 5000n
 **dc Vin 0 1 0.001 
 **op
-plot V(in)  V(out)
-plot @MN[id] @MP[id]
-plot i(vdd)
+*plot V(in)  V(out)
+*plot @MN[id] @MP[id]
+*plot i(vdd)
 
 ** Puissance de PMOS
-plot {@MP[id]*(V(dd)-V(out))}
+plot {@MP[id]*(V(dd)-V(out))} legend "Puissance de PMOS"
 ** Puissance de NMOS
-plot {@MN[id]*V(out)}
+plot {@MN[id]*V(out)} legend "Puissance de NMOS"
 ** Puissance de C
-plot V(out)*i(Vdd1)
+plot V(out)*i(Vdd1) legend "Puissance de C"
 ** Puissance de E
-plot {V(n2)*i(vdd2)}
+plot {V(n2)*i(vdd2)} legend "Puissance de E"
 
 
 .endc 
