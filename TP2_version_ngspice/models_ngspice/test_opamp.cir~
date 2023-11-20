@@ -1,0 +1,17 @@
+
+.include opamp.cir
+
+
+Xopamp inp 0 out opamp
+
+Vin inp 0 0 ac 1 
+
+.control
+*tran 10u 10m uic
+ac dec 1000 1 1e6
+plot ac vdb(out) xlog
+save all
+write
+.endc
+
+

@@ -1,0 +1,55 @@
+
+.include transducer_models.cir 
+
+.param mass=4.14e-6
+.param Q=0.3
+.param f0=500
+.param h=120e-6
+.param k=(2*3.1415926*f0)^2*mass
+.param mu=mass*2*3.1415926*f0/Q
+
+.param N=2*300
+.param l=100e-6
+.param d0=4e-6
+.param S=N*h*l*2
+
+
+
+* Le circuit principal : on instancie le résonateur et on applique la somme 
+* des trois forces: le stopper, le transducteur et éventuellement la force externe
+
+* Un résonateur + un trasducteur + un stoppeur
+
+* Le transducteur  
+Xtransd_plus x ft_plus cplus common transducer  d0={d0} S={S} grad=1 type=1 
+Xtransd_minus x ft_minus cminus common transducer d0={d0} S={S} grad=-1 type=1 
+
+* Le stoppeur
+Xstop x force_stop stopper dstop=60e-6 kst=1e6
+
+* Source de force externe : dans ce modèle, la force externe est nulle
+* Vforce f_ext 0 sin 0 {mass*10} 100  
+ Vforce f_ext 0 {mass*10}  
+
+** On additionne les trois forces : 
+Xadd3 f_ext force_stop ft_plus ft_minus f adder4
+
+** et on applique cette force au résonateur
+Xres f 0 x resonator mass={mass} mu={mu} k={k}
+
+** On applique une tension au transducteur 
+Vtran_plus   cminus 0 0 
+Vtran_minus  cplus  0 0 
+Vtran_common common 0 0 
+
+
+*Vtran cp 0 sin 50 1 400 0 ac 1
+
+.control
+tran 10u 10m uic
+*ac dec 1000 10 1000 
+plot x
+*plot mag(x)
+save all 
+write
+.endc

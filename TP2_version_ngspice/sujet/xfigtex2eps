@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# here important: extention contains the three last letters of the filename
+# if it is not fig, exit -1
+extention=`echo $1| sed -e  " s/\(.*\)\(...\)/\2/" `
+
+# here important : the spaces between [[ and the condition !!!! 
+if [[ $extention != "fig" ]] 
+then
+	echo
+	echo "Wrong file type!!!!!!!!"
+	echo
+	exit -1
+fi
+
+
+
+echo "Im here"
+echo $extention
+	 
+r=5555522221111pppppppp
+
+tex=$r".tex"
+dvi=$r".dvi"
+pdf=$r".pdf"
+
+
+b=`echo $1 | sed -e 's/fig/pstex/'` 
+c=`echo $1 | sed -e 's/fig/pstex_t/'` 
+eps=`echo $1 | sed -e 's/fig/eps/'` 
+eps1=`echo $1 | sed -e 's/fig/eps1/'` 
+     
+
+fig2dev -L pstex $1 $b
+fig2dev -L pstex_t -p $b $1 $c
+
+
+echo "\documentclass{article}" > $tex
+echo "\usepackage{epsfig}" >> $tex
+echo "\usepackage{boxdims, pst-grad}"  >> $tex
+
+echo "\begin{document}"  >> $tex
+echo "\pagestyle{empty}"  >> $tex
+echo  >> $tex
+
+echo "\begin{figure}"  >> $tex
+echo " \centering"  >> $tex
+echo " \input{"$c"}"  >> $tex
+echo "\end{figure}"  >> $tex
+
+echo "\end{document}"   >> $tex
+
+latex $tex 
+#dvips -E  $dvi -o $eps1
+#epstool --copy --bbox $eps1 $eps
+dvips -E  $dvi -o $eps
+epstopdf $eps 
+
+
+if  [ "$2" = "epsonly" ]; then
+     rm $b $a 
+     echo I remove $a et $b car $2
+ fi
+
+#rm $eps1 "$r"* $b $c
+

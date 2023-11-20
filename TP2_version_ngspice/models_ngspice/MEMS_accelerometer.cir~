@@ -1,0 +1,50 @@
+
+.include transducer_models.cir 
+
+
+
+.subckt MEMS_accelerometer cplus cminus common F_ext pos capa_plus capa_minus  
+** Parameters of the MEMS device 
+*mass
+.param mass=4.14e-6
+*Quality factor
+.param Q=0.3
+* Natural resonance frequency
+.param f0=500
+*Calculation of the stiffness 
+.param k=(2*3.1415926*f0)^2*mass
+*Calculation of the damping coefficient
+.param mu=mass*2*3.1415926*f0/Q
+
+
+*** Parameters of the transducers
+* Height of the structure
+.param h=120e-6
+* number of elementary transducers 
+.param N=2*300
+* overlaping length 
+.param l=100e-6
+* gap
+.param d0=4e-6
+* overlapping area
+.param S=N*h*l*2
+
+
+* The two transducers (a differential transducer), gap closing
+ 
+Xtransd_plus pos ft_plus cplus common capa_plus transducer  d0={d0} S={S} grad=1 type=1 
+Xtransd_minus pos ft_minus cminus common capa_minus transducer d0={d0} S={S} grad=-1 type=1 
+
+* Stopper 
+Xstop pos force_stop stopper dstop={0.9*d0} kst=1e6
+
+** The mechanical force acting on a resonator is a sum of four forces : 
+** The forces of two transducers, the stopper and the external force
+Xadd3 f_ext force_stop ft_plus ft_minus f adder4
+
+** This force is now applied to the resonator 
+Xres f 0 pos resonator mass={mass} mu={mu} k={k}
+
+
+.ends
+

@@ -1,0 +1,47 @@
+* Cette premiere ligne est ignoree !!!!!!!!!! 
+
+.include MEMS_accelerometer.cir
+.include opamp.cir
+
+* la fréquence de coupure du filtre
+.param fc=1000
+.param Rfilter=1000
+.param Cfilter={1/(2*3.1415926*Rfilter*fc)}
+.param mass=4.14e-6
+
+* Instanciation of the accelerometer device 
+Xmems_device  cplus cminus common f_ext x capa_plus capa_minus  MEMS_accelerometer
+
+* External acceleration 
+*Vaccel f_ext 0 {mass*9.8}
+Vaccel f_ext 0 sin 0 {mass*9.8} 100 
+
+* Input voltage sources 
+Vplus cplus 0  sin 0 1 100000 0
+Vminus cminus 0  sin 0 1 100000 0 0 180 
+
+*l'amplificateur opératinnel
+Xopamp common out1 out1 opamp
+
+* Multiplication 
+Edemod out_demod 0 vol={v(out1)*v(cplus)} 
+
+
+
+** A low pass filter
+Rfilter out_demod out  {Rfilter}
+Cfilter out 0 {Cfilter}
+
+
+
+.control
+tran 1u 40m uic
+plot out
+save all
+write
+.endc
+
+
+
+
+.option hmax=1e-6 vntol=3e-9 reltol=0.000005 eps=1e-12 chgtol=5e-12 abstol=1e-12 gmin=1e-12

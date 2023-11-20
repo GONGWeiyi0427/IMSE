@@ -1,0 +1,55 @@
+* Cette premiere ligne est ignoree !!!!!!!!!! 
+
+.include MEMS_accelerometer.cir
+.include opamp.cir
+
+
+.param mass=4.14e-6
+** Model of the switch
+.model switch1 sw vt=0.5 vh=0.1 ron=0.1 roff=1e10
+
+* A subcircuit implementing a 3 pin switch with one common electrode 
+.subckt double_switch common splus sminus control control_bar
+S1 common splus control 0 switch1  
+S2 common sminus control_bar 0  switch1 
+.ends
+
+
+* Instanciation of the accelerometer device 
+Xmems_device  cplus cminus common f_ext x capa_plus capa_minus  MEMS_accelerometer
+
+* External acceleration 
+*Vaccel f_ext 0 {mass*9.8}
+Vaccel f_ext 0 sin 0 {mass*9.8} 100 
+
+
+* les deux horloges 
+Vclk clk 0  pulse         0 1 0 10e-6 10e-6 95e-6  200e-6 
+Vclk_bar clk_bar 0  pulse 1 0 0 10e-6 10e-6 95e-6  200e-6 
+
+* les sources et les switches
+Vplus vp  0 0.1 
+XSW1  cplus vp 0 clk clk_bar double_switch
+Vminus vm 0  -0.1 
+XSW2  cminus vm 0 clk clk_bar double_switch
+
+*l'ampli op
+Xopamp 0 common out1 opamp Rin=1e10
+*le switch SW3
+Ssw3 common out1 clk  0 switch1
+Cmeasure common out1 1p ic=0
+
+*.tran 10e-3 10e-3 uic 
+
+.control
+tran 10u 10m uic
+plot x
+plot out1
+plot capa_plus capa_minus
+save all 
+write
+.endc
+
+
+
+.option hmax=1e-7 vntol=3e-9 reltol=0.000005 eps=1e-12 chgtol=5e-12 abstol=1e-12 gmin=1e-12
