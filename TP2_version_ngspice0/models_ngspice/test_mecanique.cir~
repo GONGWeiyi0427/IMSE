@@ -1,0 +1,27 @@
+
+.include MEMS_accelerometer.cir 
+
+.param mass=4.14e-6
+
+* Instanciation of the accelerometer device 
+Xmems_device  cplus cminus common f_ext x capa_plus capa_minus  MEMS_accelerometer
+
+* Source de force externe : dans ce modèle, la force externe est nulle
+* Vforce f_ext 0 sin 0 {mass*10} 100  
+ Vforce f_ext 0 {mass*10}  
+
+
+
+** On applique une tension au transducteur 
+Vtran_plus   cminus 0 0 
+Vtran_minus  cplus  0 0 
+Vtran_common common 0 0 
+
+.control
+tran 10u 10m uic
+*ac dec 1000 10 1000 
+plot x
+plot capa_plus capa_minus
+save all 
+write
+.endc

@@ -1,0 +1,24 @@
+
+** Operational amplifier with input / output resistance, finite gain, output voltage limits and 1st order transfer characteristic
+
+.subckt opamp inp inn out Rin=1e7 G=1e5 Rout=50 Vdd=5 Vss=-5 fc=100
+.param Rfilter=1000
+.param Cfilter={1/(2*3.1415926*Rfilter*fc)}
+
+** The gain
+E out1 0 inp inn {G} 
+** The input resistance
+Rin inp inn {Rin}
+
+** A low pass filter
+Rfilter out1 out2  {Rfilter}
+Cfilter out2 0 {Cfilter}
+
+* Buffering and voltage limitation
+E out3 0 out2 0 vol={v(out2)>Vdd?Vdd:
+                    +(v(out2)<Vss?Vss:v(out2))}
+
+* The output resistance 
+Rout out3 out {Rout}
+
+.ends
